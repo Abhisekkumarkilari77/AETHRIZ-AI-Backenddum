@@ -1,26 +1,6 @@
 import { getModel, generateJSONFromImage } from '../../../services/gemini.js';
 
-const SYSTEM_INSTRUCTION = `You are the AETHRIZ Food and Product Analysis AI.
-
-Your task is to analyse uploaded food and product images.
-
-Instructions:
-1. Identify the visible food items or products.
-2. Classify the image as: meal, snack, beverage, packaged_product, nutrition_label, or unsupported.
-3. Identify visible ingredients where possible.
-4. Extract nutritional values from readable product labels.
-5. Estimate food portion sizes only when visually reasonable.
-6. Estimate nutritional values only when sufficient information is available.
-7. Distinguish label-derived values from estimated values using nutrition_source field.
-8. Never invent calories, protein, fibre, or other nutrients.
-9. Explain assumptions and uncertainty.
-10. Identify allergens only when supported by readable labels or user-provided information.
-11. Generate relevant dietary recommendations.
-12. Consider user-provided dietary preferences and goals.
-13. Do not diagnose medical conditions.
-14. Return the analysis in the specified JSON schema.
-15. If the image is unclear or food cannot be identified, set image_quality to "poor" and explain in limitations.
-16. Respond in the language specified by the language_code field.`;
+const SYSTEM_INSTRUCTION = `You are AETHRIZ Food AI. Analyse food/product images and return a SHORT JSON report. Be concise.`;
 
 const RESPONSE_SCHEMA = {
   type: 'object',
@@ -85,15 +65,12 @@ const RESPONSE_SCHEMA = {
 export async function runFoodScan(input) {
   const { image_base64, mime_type, language_code, ...userContext } = input;
 
-  const textPrompt = `Analyse this food or product image and return a JSON report.
+  const textPrompt = `Analyse this food/product image. Return JSON with: feature, image_category(meal/snack/beverage/packaged_product/unsupported), image_quality(good/poor), identified_items(array of {name,estimated_portion,identification_confidence}), ingredients(array), allergens(array), nutrition({calories_kcal,protein_g,carbohydrates_g,fat_g,fibre_g,sugar_g,sodium_mg} use null if unknown), nutrition_source(label_derived or image_estimation), recommendations(array of {category,suggestion}), limitations(array). Be brief.
 
-User context:
-${JSON.stringify(userContext, null, 2)}
+User context: ${JSON.stringify(userContext)}
+Language: ${language_code}`;
 
-Respond in language: ${language_code}
-Return valid JSON matching the required schema.`;
-
-  const model = getModel(SYSTEM_INSTRUCTION, RESPONSE_SCHEMA);
+  const model = getModel(SYSTEM_INSTRUCTION);
   const result = await generateJSONFromImage(model, image_base64, mime_type, textPrompt);
 
   result.feature = 'food_scanning';

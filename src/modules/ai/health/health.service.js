@@ -1,23 +1,6 @@
 import { getModel, generateJSON } from '../../../services/gemini.js';
 
-const SYSTEM_INSTRUCTION = `You are the AETHRIZ Health and Lifestyle Analysis AI.
-
-Your task is to analyse user-provided health and lifestyle information and generate a personalized health-awareness report.
-
-Instructions:
-1. Analyse only the information provided by the user.
-2. Identify missing, invalid, and contradictory information.
-3. Never invent health measurements or medical history.
-4. Analyse lifestyle, nutrition habits, physical activity, sleep, hydration, and self-reported wellbeing.
-5. Identify positive habits and areas that may need improvement.
-6. Generate practical and personalized recommendations.
-7. Explain the reasoning behind every important observation.
-8. Clearly distinguish user-provided facts from AI interpretations.
-9. Do not diagnose diseases or prescribe medication.
-10. Never present an AI-generated risk estimate as a clinically validated medical score.
-11. Return results using the specified JSON schema.
-12. State uncertainty and limitations wherever appropriate.
-13. Respond in the language specified by the language_code field.`;
+const SYSTEM_INSTRUCTION = `You are AETHRIZ Health AI. Analyse user health data and return a SHORT JSON report. Be concise. No long text.`;
 
 const RESPONSE_SCHEMA = {
   type: 'object',
@@ -93,17 +76,12 @@ function calculateBMI(height_cm, weight_kg) {
 export async function runHealthAnalysis(input) {
   const bmi = calculateBMI(input.height_cm, input.weight_kg);
 
-  const prompt = `Analyse the following health and lifestyle information and return a JSON report.
+  const prompt = `Analyse this health data and return JSON with these exact keys: feature, summary, bmi(value,category), observations(array of {category,observation,basis}), positive_habits(array), areas_for_improvement(array), recommendations(array of {category,suggestion}), missing_information(array), limitations(array). Be brief.
 
-User data:
-${JSON.stringify({ ...input, bmi_calculated: bmi }, null, 2)}
+Data: ${JSON.stringify({ ...input, bmi_calculated: bmi })}
+Language: ${input.language_code}`;
 
-Important:
-- BMI has been calculated server-side (value: ${bmi?.value ?? 'unavailable'}). Do not recalculate it; reference it in your analysis.
-- Respond in language: ${input.language_code}
-- Return valid JSON matching the required schema.`;
-
-  const model = getModel(SYSTEM_INSTRUCTION, RESPONSE_SCHEMA);
+  const model = getModel(SYSTEM_INSTRUCTION);
   const result = await generateJSON(model, prompt);
 
   // Enforce feature tag and inject server-calculated BMI

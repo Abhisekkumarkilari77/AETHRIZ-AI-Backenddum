@@ -12,7 +12,7 @@ export function getModel(systemInstruction, responseSchema) {
     throw new AppError(503, 'AI_NOT_CONFIGURED', 'AI service is not configured');
   }
 
-  const generationConfig = { temperature: 0.4, maxOutputTokens: 4096 };
+  const generationConfig = { temperature: 0.2, maxOutputTokens: 1500 };
   if (responseSchema) {
     generationConfig.responseMimeType = 'application/json';
     generationConfig.responseSchema = responseSchema;

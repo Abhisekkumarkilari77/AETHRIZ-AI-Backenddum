@@ -1,47 +1,175 @@
-# AETHRIZ AI Backend — Phase 1
+# AETHRIZ AI Backend
 
-Node.js · Express 5 · ES Modules · Supabase (PostgreSQL, Auth, Storage) · Zod · Swagger · Jest/Supertest.
-**No MongoDB.** Supabase PostgreSQL is the only application database.
+Node.js · Express 5 · ES Modules · Supabase (PostgreSQL) · Google Gemini AI · Zod
 
-## Run
+---
+
+## Quick Start
+
+### 1. Clone & Install
+```bash
+git clone https://github.com/Abhisekkumarkilari77/AETHRIZ-AI-Backenddum.git
+cd AETHRIZ-AI-Backenddum
+npm install
+```
+
+### 2. Setup Environment
+```bash
+cp .env.example .env
+```
+Fill in `.env`:
+```
+SUPABASE_URL=https://ecwzbolyzdqkxdvpnosi.supabase.co
+SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+SUPABASE_SECRET_KEY=your-secret-key
+SUPABASE_JWKS_URL=https://ecwzbolyzdqkxdvpnosi.supabase.co/auth/v1/.well-known/jwks.json
+IP_HASH_SALT=change-me-to-a-long-random-string
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-3.5-flash-lite
+```
+Get Gemini API key: https://aistudio.google.com/apikey
+
+### 3. Setup Supabase Tables
+Go to: https://supabase.com/dashboard/project/ecwzbolyzdqkxdvpnosi/sql/new
+
+Paste and run this SQL:
+```sql
+create or replace function public.set_updated_at()
+returns trigger language plpgsql as $$
+begin new.updated_at = now(); return new; end $$;
+
+create table if not exists public.supported_languages (
+  id uuid primary key default gen_random_uuid(),
+  code text not null unique,
+  name text not null,
+  native_name text not null,
+  direction text not null default 'ltr',
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+insert into public.supported_languages (code, name, native_name) values
+('en','English','English') on conflict do nothing;
+
+create table if not exists public.health_analyses (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid,
+  status text not null default 'pending',
+  input jsonb not null default '{}',
+  result jsonb,
+  language_code text not null default 'en',
+  credits_charged int not null default 0,
+  is_trial boolean not null default false,
+  error_code text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+
+create table if not exists public.food_scans (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid,
+  image_path text not null default 'inline',
+  status text not null default 'pending',
+  result jsonb,
+  language_code text not null default 'en',
+  credits_charged int not null default 0,
+  is_trial boolean not null default false,
+  error_code text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+```
+
+### 4. Run Backend
+```bash
+npm run dev
+```
+Server starts at http://localhost:3001
+
+### 5. Run Frontend
+```bash
+cd frontend
+npx serve .
+```
+Open the URL shown (e.g. http://localhost:58824)
+
+---
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /api/v1/ai/health | Run health analysis |
+| GET | /api/v1/ai/health | List health analyses |
+| GET | /api/v1/ai/health/:id | Get health analysis by ID |
+| POST | /api/v1/ai/food | Scan food/product image |
+| GET | /api/v1/ai/food | List food scans |
+| GET | /api/v1/ai/food/:id | Get food scan by ID |
+| GET | /health/live | Liveness check |
+| GET | /health/ready | Readiness check |
+
+---
+
+## Test API directly
+
+### Health Analysis
+```bash
+curl -X POST http://localhost:3001/api/v1/ai/health \
+  -H "Content-Type: application/json" \
+  -d '{"age":22,"height_cm":170,"weight_kg":75,"sleep_hours":6,"activity_level":"light","water_intake_litres":1.5,"goals":["improve fitness"],"language_code":"en"}'
+```
+
+### Food Scan (PowerShell)
+```powershell
+$img = [Convert]::ToBase64String([IO.File]::ReadAllBytes("C:\path\to\food.jpg"))
+curl -X POST http://localhost:3001/api/v1/ai/food `
+  -H "Content-Type: application/json" `
+  -d "{`"image_base64`":`"$img`",`"mime_type`":`"image/jpeg`"}"
+```
+
+---
+
+## Project Structure
+
+```
+src/
+  config/         env.js · supabase.js
+  middleware/     auth · validate · errorHandler · requestId
+  modules/
+    auth/         register · login · refresh · logout
+    profile/      get · update · delete
+    ai/
+      health/     health analysis (Gemini)
+      food/       food scanning (Gemini multimodal)
+  services/       gemini.js (shared AI client)
+  utils/          errors · logger · audit
+frontend/
+  index.html      UI
+  app.js          API calls + result rendering
+  style.css       Dark theme styles
+supabase/
+  migrations/     SQL schema files
+```
+
+---
+
+## Git Commands
 
 ```bash
-cp .env.example .env          # fill SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY, SUPABASE_JWKS_URL, IP_HASH_SALT
-supabase db push              # or: supabase start && supabase db reset   (applies supabase/migrations)
-npm install
-npm run dev                   # http://localhost:3000  ·  docs: /docs  ·  spec: /openapi.json
-npm test                      # 10 DB tests (real Postgres via PGlite) + 20 API tests
+# Check status
+git status
+
+# Add all changes
+git add .
+
+# Commit
+git commit -m "your message"
+
+# Push
+git push
+
+# All in one
+git add . && git commit -m "update" && git push
 ```
-In Supabase Dashboard → Auth: enable **Confirm email**, set Site URL and redirect URLs to your `APP_URL`.
-
-## Structure (one folder per module: routes → controller → service → schemas)
-
-```
-supabase/migrations/   0001 schema (18 tables) · 0002 atomic functions · 0003 RLS · 0004 storage buckets
-src/config/            env (Zod, fail-fast) · supabase clients (admin / anon / per-user JWT)
-src/middleware/        auth (JWT + role) · validate (Zod) · requestId · errorHandler
-src/modules/           auth · profile · health   (Phase 2+ modules slot in here)
-src/utils/             errors · logger · audit
-tests/db · tests/api
-```
-
-## Security model
-- **Auth:** Supabase Auth only (no custom passwords). Every protected request re-verifies the JWT with Supabase and checks the account is not disabled. Role comes from `user_profiles.role`.
-- **Two database paths:** user-scoped client (RLS enforced) for profile reads/writes; service-role client only in trusted backend code (audit log, soft delete, future credit/trial calls).
-- **RLS on all 18 tables.** Users: read own rows; write only safe `user_profiles` columns, own `health_profiles`, own language prefs. `role`, `phone`, wallets, trials, credits, scans, logs are **not writable by clients** (column grants + no policies). Admins get explicit `admin_select` read policies.
-- **Critical operations are Postgres functions** executable only by `service_role`: `credit_grant/reserve/settle/refund`, `trial_consume`, `purge_expired_data`. Row locks + idempotency keys make them atomic and replay-safe.
-- No account enumeration (register/forgot/resend return generic messages; login errors are generic).
-- Helmet, strict CORS allow-list, 100 KB body limit, rate limits (global + auth), IPs stored only as salted hashes, secrets never logged, errors never leak internals.
-- Storage buckets are private with size/MIME limits and **no client policies**; the backend will upload and issue signed URLs (Phase 4).
-
-## API (Phase 1)
-`POST /api/v1/auth/{register,login,refresh,logout,password/forgot,password/update,verification/resend}` ·
-`GET|PATCH|DELETE /api/v1/profile/me` · `GET /health/live` · `GET /health/ready`
-
-## Notes / decisions to confirm
-- Rate limiting is in-memory for now; **Redis-backed limits arrive in Phase 7** (needed for multi-instance deploys).
-- DB functions for credits/trials are built and tested already; their HTTP endpoints and Gemini wiring are Phases 6–7.
-- Schedule `select public.purge_expired_data();` daily (pg_cron or a backend job) for data retention.
-- Token verification calls Supabase per request (simple, revocation-safe); can later move to local JWKS verification + short cache.
-
-# AETHRIZ-AI-Backenddum

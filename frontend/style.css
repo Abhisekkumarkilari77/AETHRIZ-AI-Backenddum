@@ -1,0 +1,156 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #0f0f13;
+  color: #e8e8f0;
+  min-height: 100vh;
+}
+
+.app { max-width: 860px; margin: 0 auto; padding: 24px 16px; }
+
+header { text-align: center; margin-bottom: 32px; }
+header h1 { font-size: 2rem; background: linear-gradient(135deg, #7c6af7, #4fc3f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+header p { color: #888; margin-top: 4px; }
+
+.card {
+  background: #1a1a24;
+  border: 1px solid #2a2a3a;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.card h2 { font-size: 1.2rem; margin-bottom: 20px; color: #c8c8e8; }
+
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.tab {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: 1px solid #2a2a3a;
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.tab.active, .tab:hover { background: #7c6af7; color: #fff; border-color: #7c6af7; }
+
+.main-tabs { margin-bottom: 24px; }
+.main-tabs .tab { padding: 10px 24px; font-size: 1rem; }
+
+input, select, textarea {
+  width: 100%;
+  background: #12121a;
+  border: 1px solid #2a2a3a;
+  border-radius: 8px;
+  color: #e8e8f0;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  margin-top: 4px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input:focus, select:focus, textarea:focus { border-color: #7c6af7; }
+textarea { resize: vertical; }
+
+label { display: flex; flex-direction: column; font-size: 0.82rem; color: #888; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media(max-width:560px){ .form-grid { grid-template-columns: 1fr; } }
+
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+@media(max-width:560px){ .row { grid-template-columns: 1fr; } }
+
+.btn-primary {
+  margin-top: 16px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #7c6af7, #4fc3f7);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-primary:hover { opacity: 0.88; }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-outline {
+  padding: 6px 16px;
+  border: 1px solid #2a2a3a;
+  border-radius: 8px;
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.btn-outline:hover { border-color: #7c6af7; color: #7c6af7; }
+
+.topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+#user-email-display { font-size: 0.85rem; color: #666; }
+
+.upload-area {
+  border: 2px dashed #2a2a3a;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  margin-bottom: 16px;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.upload-area:hover, .upload-area.drag-over { border-color: #7c6af7; }
+.upload-area p { color: #666; }
+.upload-area .hint { font-size: 0.78rem; margin-top: 6px; }
+#preview-img { max-width: 100%; max-height: 300px; border-radius: 8px; }
+
+.msg { margin-top: 12px; font-size: 0.88rem; min-height: 20px; }
+.msg.error { color: #f87171; }
+.msg.success { color: #4ade80; }
+.msg.loading { color: #7c6af7; }
+
+/* Result cards */
+.result-card { background: #1a1a24; border: 1px solid #2a2a3a; border-radius: 16px; padding: 24px; margin-bottom: 16px; }
+.result-card h3 { font-size: 1rem; color: #7c6af7; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin: 2px; }
+.badge-green { background: #14532d; color: #4ade80; }
+.badge-yellow { background: #422006; color: #fbbf24; }
+.badge-red { background: #450a0a; color: #f87171; }
+.badge-blue { background: #0c2a4a; color: #4fc3f7; }
+.badge-purple { background: #2e1065; color: #c4b5fd; }
+
+.nutrition-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+.nutrition-item { background: #12121a; border-radius: 10px; padding: 12px; text-align: center; }
+.nutrition-item .val { font-size: 1.4rem; font-weight: 700; color: #7c6af7; }
+.nutrition-item .lbl { font-size: 0.72rem; color: #666; margin-top: 2px; }
+
+.obs-item { padding: 10px 14px; border-left: 3px solid #7c6af7; background: #12121a; border-radius: 0 8px 8px 0; margin-bottom: 8px; }
+.obs-item .obs-cat { font-size: 0.72rem; color: #7c6af7; text-transform: uppercase; font-weight: 600; }
+.obs-item .obs-text { font-size: 0.9rem; margin-top: 2px; }
+.obs-item .obs-basis { font-size: 0.75rem; color: #555; margin-top: 2px; }
+
+.rec-item { padding: 10px 14px; border-left: 3px solid #4fc3f7; background: #12121a; border-radius: 0 8px 8px 0; margin-bottom: 8px; }
+.rec-item .rec-cat { font-size: 0.72rem; color: #4fc3f7; text-transform: uppercase; font-weight: 600; }
+.rec-item .rec-text { font-size: 0.9rem; margin-top: 2px; }
+
+.bmi-box { display: flex; align-items: center; gap: 20px; background: #12121a; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.bmi-val { font-size: 2.5rem; font-weight: 800; color: #7c6af7; }
+.bmi-info .cat { font-size: 1rem; font-weight: 600; text-transform: capitalize; }
+.bmi-info .note { font-size: 0.75rem; color: #555; margin-top: 4px; }
+
+.history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #12121a; border-radius: 10px; margin-bottom: 8px; cursor: pointer; border: 1px solid transparent; transition: border-color 0.2s; }
+.history-item:hover { border-color: #7c6af7; }
+.history-item .hi-id { font-size: 0.75rem; color: #555; }
+.history-item .hi-date { font-size: 0.8rem; color: #666; }
+
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #7c6af7; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.limit-box { background: #12121a; border-radius: 8px; padding: 10px 14px; margin-top: 12px; font-size: 0.8rem; color: #555; }
